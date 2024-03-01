@@ -10,6 +10,7 @@ import typing as t
 from enum import Enum
 
 import click
+from joblib import Parallel, delayed
 
 from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
@@ -441,6 +442,29 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
                     stream.forced_replication_method = "FULL_TABLE"
 
     # Sync methods
+    @t.final
+    def sync_one(self, stream: Stream) -> None:
+        """Sync a single stream.
+
+        Args:
+            stream: The stream that your would like to sync.
+        """
+        if not stream.selected and not stream.has_selected_descendents:
+            self.logger.info("Skipping deselected stream '%s'.", stream.name)
+            return
+
+        if stream.parent_stream_type:
+            self.logger.debug(
+                "Child stream '%s' is expected to be called "
+                "by parent stream '%s'. "
+                "Skipping direct invocation.",
+                type(stream).__name__,
+                stream.parent_stream_type.__name__,
+            )
+            return
+
+        stream.sync()
+        stream.finalize_state_progress_markers()
 
     @t.final
     def sync_all(self) -> None:
@@ -449,24 +473,13 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         self._set_compatible_replication_methods()
         self.write_message(StateMessage(value=self.state))
 
-        stream: Stream
-        for stream in self.streams.values():
-            if not stream.selected and not stream.has_selected_descendents:
-                self.logger.info("Skipping deselected stream '%s'.", stream.name)
-                continue
+        def _sync_one(stream: Stream) -> None:
+            self.sync_one(stream)
 
-            if stream.parent_stream_type:
-                self.logger.debug(
-                    "Child stream '%s' is expected to be called "
-                    "by parent stream '%s'. "
-                    "Skipping direct invocation.",
-                    type(stream).__name__,
-                    stream.parent_stream_type.__name__,
-                )
-                continue
-
-            stream.sync()
-            stream.finalize_state_progress_markers()
+        # with parallel_backend(backend="multiprocessing", n_jobs=2):
+        Parallel(n_jobs=-1)(
+            delayed(_sync_one)(stream) for stream in self.streams.values()
+        )
 
         # this second loop is needed for all streams to print out their costs
         # including child streams which are otherwise skipped in the loop above
