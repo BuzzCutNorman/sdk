@@ -10,7 +10,7 @@ import typing as t
 from enum import Enum
 
 import click
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, parallel_config
 
 from singer_sdk._singerlib import Catalog, StateMessage
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
@@ -476,10 +476,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         def _sync_one(stream: Stream) -> None:
             self.sync_one(stream)
 
-        # with parallel_backend(backend="multiprocessing", n_jobs=2):
-        Parallel(n_jobs=-1)(
-            delayed(_sync_one)(stream) for stream in self.streams.values()
-        )
+        with parallel_config(backend="loky", n_jobs=-2):
+            Parallel()(delayed(_sync_one)(stream) for stream in self.streams.values())
 
         # this second loop is needed for all streams to print out their costs
         # including child streams which are otherwise skipped in the loop above
