@@ -520,7 +520,7 @@ class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
             return
 
         def _drain_sink(sink: Sink) -> None:
-            self.drain_one(sink)
+            asyncio.run(self.drain_one(sink))
 
         with parallel_backend("threading", n_jobs=parallelism):
             Parallel()(delayed(_drain_sink)(sink=sink) for sink in sink_list)
