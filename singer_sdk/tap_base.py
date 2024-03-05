@@ -480,8 +480,12 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         def _sync_one(stream: Stream) -> None:
             self.sync_one(stream)
 
-        with parallel_config(backend="loky", prefer="processes", n_jobs=-2):
-            Parallel()(delayed(_sync_one)(stream) for stream in self.streams.values())
+        with parallel_config(
+            backend="loky",
+            prefer="processes",
+            n_jobs=-2,
+        ), Parallel() as parallel:
+            parallel(delayed(_sync_one)(stream) for stream in self.streams.values())
 
         # this second loop is needed for all streams to print out their costs
         # including child streams which are otherwise skipped in the loop above
