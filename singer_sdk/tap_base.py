@@ -6,6 +6,7 @@ from __future__ import annotations
 import abc
 import contextlib
 import json
+import logging
 import typing as t
 from enum import Enum
 
@@ -444,7 +445,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
     # Sync methods
 
     @t.final
-    def sync_one(self, stream: Stream) -> None:
+    @staticmethod
+    def sync_one(stream: Stream) -> None:
         """Sync a single stream.
 
         Args:
@@ -453,12 +455,13 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         This is a link to a logging example for joblib.
         https://github.com/joblib/joblib/issues/1017
         """
+        logger = logging.getLogger(stream.tap_name)
         if not stream.selected and not stream.has_selected_descendents:
-            self.logger.info("Skipping deselected stream '%s'.", stream.name)
+            logger.info("Skipping deselected stream '%s'.", stream.name)
             return
 
         if stream.parent_stream_type:
-            self.logger.debug(
+            logger.debug(
                 "Child stream '%s' is expected to be called "
                 "by parent stream '%s'. "
                 "Skipping direct invocation.",
