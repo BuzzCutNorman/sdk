@@ -187,7 +187,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         The default is 8 if not overridden.
 
         Returns:
-            Max number of sinks that can be drained in parallel.
+            Max number of streams that can be synced in parallel.
         """
         if self._max_parallelism is not None:
             return self._max_parallelism
@@ -201,7 +201,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         The default is 8 if not overridden.
 
         Args:
-            new_value: The new max degree of parallelism for this target.
+            new_value: The new max degree of parallelism for this tap.
         """
         self._max_parallelism = new_value
 
