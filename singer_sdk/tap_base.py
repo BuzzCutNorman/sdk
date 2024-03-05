@@ -42,6 +42,8 @@ if t.TYPE_CHECKING:
 
 STREAM_MAPS_CONFIG = "stream_maps"
 
+_MAX_PARALLELISM = 8
+
 
 class CliTestOptionValue(Enum):
     """Values for CLI option --test."""
@@ -98,6 +100,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         self._input_catalog: Catalog | None = None
         self._state: dict[str, Stream] = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
+        self._max_parallelism: int | None = _MAX_PARALLELISM
 
         # Process input catalog
         if isinstance(catalog, Catalog):
@@ -176,6 +179,31 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
             self._catalog = self.input_catalog or self._singer_catalog
 
         return self._catalog
+
+    @property
+    def max_parallelism(self) -> int:
+        """Get max parallel sinks.
+
+        The default is 8 if not overridden.
+
+        Returns:
+            Max number of sinks that can be drained in parallel.
+        """
+        if self._max_parallelism is not None:
+            return self._max_parallelism
+
+        return _MAX_PARALLELISM
+
+    @max_parallelism.setter
+    def max_parallelism(self, new_value: int) -> None:
+        """Override the default (max) parallelism.
+
+        The default is 8 if not overridden.
+
+        Args:
+            new_value: The new max degree of parallelism for this target.
+        """
+        self._max_parallelism = new_value
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
@@ -483,7 +511,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         with parallel_config(
             backend="loky",
             prefer="processes",
-            n_jobs=-2,
+            n_jobs=self.max_parallelism,
         ), Parallel() as parallel:
             parallel(delayed(self.sync_one)(stream) for stream in self.streams.values())
 
