@@ -26,6 +26,7 @@ from singer_sdk.helpers._state import write_stream_state
 from singer_sdk.helpers._util import read_json_file
 from singer_sdk.helpers.capabilities import (
     BATCH_CONFIG,
+    TAP_MAX_PARALLELISM_CONFIG,
     CapabilitiesEnum,
     PluginCapabilities,
     TapCapabilities,
@@ -41,8 +42,6 @@ if t.TYPE_CHECKING:
     from singer_sdk.streams import SQLStream, Stream
 
 STREAM_MAPS_CONFIG = "stream_maps"
-
-_MAX_PARALLELISM = 8
 
 
 class CliTestOptionValue(Enum):
@@ -100,7 +99,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         self._input_catalog: Catalog | None = None
         self._state: dict[str, Stream] = {}
         self._catalog: Catalog | None = None  # Tap's working catalog
-        self._max_parallelism: int | None = _MAX_PARALLELISM
+        self._max_parallelism: int | None = self.config.get("max_parallelism")
 
         # Process input catalog
         if isinstance(catalog, Catalog):
@@ -189,21 +188,7 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         Returns:
             Max number of streams that can be synced in parallel.
         """
-        if self._max_parallelism is not None:
-            return self._max_parallelism
-
-        return _MAX_PARALLELISM
-
-    @max_parallelism.setter
-    def max_parallelism(self, new_value: int) -> None:
-        """Override the default (max) parallelism.
-
-        The default is 8 if not overridden.
-
-        Args:
-            new_value: The new max degree of parallelism for this tap.
-        """
-        self._max_parallelism = new_value
+        return self._max_parallelism
 
     def setup_mapper(self) -> None:
         """Initialize the plugin mapper for this tap."""
@@ -248,6 +233,9 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         capabilities = cls.capabilities
         if PluginCapabilities.BATCH in capabilities:
             merge_missing_config_jsonschema(BATCH_CONFIG, config_jsonschema)
+            merge_missing_config_jsonschema(
+                TAP_MAX_PARALLELISM_CONFIG, config_jsonschema
+            )
 
     # Connection and sync tests:
 
