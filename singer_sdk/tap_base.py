@@ -442,12 +442,16 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
                     stream.forced_replication_method = "FULL_TABLE"
 
     # Sync methods
+
     @t.final
     def sync_one(self, stream: Stream) -> None:
         """Sync a single stream.
 
         Args:
             stream: The stream that your would like to sync.
+
+        This is a link to a logging example for joblib.
+        https://github.com/joblib/joblib/issues/1017
         """
         if not stream.selected and not stream.has_selected_descendents:
             self.logger.info("Skipping deselected stream '%s'.", stream.name)
