@@ -125,6 +125,14 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
             state_dict = read_json_file(state)
         self.load_state(state_dict)
 
+        # Prepare logger for parallel processes
+        console_handler = logging.StreamHandler(sys.stderr)
+        console_formatter = logging.Formatter(
+            fmt="{asctime:23s} | {levelname:8s} | {name:20s} | {message}", style="{"
+        )
+        console_handler.setFormatter(console_formatter)
+        self.logger.addHandler(console_handler)
+
     # Class properties
 
     @property
@@ -518,13 +526,6 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
             for stream in self.streams.values():
                 self.sync_one(stream)
         else:
-            console_handler = logging.StreamHandler(sys.stderr)
-            console_formatter = logging.Formatter(
-                fmt="{asctime:23s} | {levelname:8s} | {name:20s} | {message}", style="{"
-            )
-            console_handler.setFormatter(console_formatter)
-            self.logger.addHandler(console_handler)
-            self.metrics_logger.addHandler(console_handler)
             m = Manager()
             q = m.Queue()
             listener = QueueListener(q, *self.logger.handlers)
