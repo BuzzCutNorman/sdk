@@ -467,10 +467,10 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
     # Sync methods
 
     @t.final
-    @staticmethod
     def sync_one(
+        self,
         stream: Stream,
-        log_level: logging.Logger,
+        log_level: logging.Logger | None = None,
         log_queue: Queue | None = None,
     ) -> None:
         """Sync a single stream.
@@ -483,18 +483,17 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
         This is a link to a logging example for joblib.
         https://github.com/joblib/joblib/issues/1017
         """
-        logger = logging.getLogger(stream.tap_name)
-        if log_queue is not None and not logger.hasHandlers():
+        if log_queue is not None and not self.logger.hasHandlers():
             h = QueueHandler(log_queue)
-            logger.addHandler(h)
-        logger.setLevel(log_level)
+            self.logger.addHandler(h)
+            self.logger.setLevel(log_level)
 
         if not stream.selected and not stream.has_selected_descendents:
-            logger.info("Skipping deselected stream '%s'.", stream.name)
+            self.logger.info("Skipping deselected stream '%s'.", stream.name)
             return
 
         if stream.parent_stream_type:
-            logger.debug(
+            self.logger.debug(
                 "Child stream '%s' is expected to be called "
                 "by parent stream '%s'. "
                 "Skipping direct invocation.",
