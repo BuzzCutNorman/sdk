@@ -487,6 +487,8 @@ class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):
             h = QueueHandler(log_queue)
             self.logger.addHandler(h)
             self.logger.setLevel(log_level)
+            self.metrics_logger.addHandler(h)
+            self.metrics_logger.setLevel(log_level)
 
         if not stream.selected and not stream.has_selected_descendents:
             self.logger.info("Skipping deselected stream '%s'.", stream.name)
