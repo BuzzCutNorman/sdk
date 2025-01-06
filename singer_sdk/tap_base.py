@@ -12,7 +12,6 @@ from enum import Enum
 import click
 
 from singer_sdk._singerlib import Catalog, StateMessage
-from singer_sdk._singerlib.encoding import SimpleSingerWriter as SingerWriter
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
@@ -50,7 +49,7 @@ class CliTestOptionValue(Enum):
     Disabled = "disabled"
 
 
-class Tap(PluginBase, SingerWriter, metaclass=abc.ABCMeta):  # noqa: PLR0904
+class Tap(PluginBase, metaclass=abc.ABCMeta):  # noqa: PLR0904
     """Abstract base class for taps.
 
     The Tap class governs configuration, validation, and stream discovery for tap
