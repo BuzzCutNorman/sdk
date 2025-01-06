@@ -44,6 +44,7 @@ if t.TYPE_CHECKING:
 
     from ._singerlib.encoding import (
         GenericSingerWriter,
+        SingerMessageType,
     )
 
 SDK_PACKAGE_NAME = "singer_sdk"
@@ -380,6 +381,17 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             NotImplementedError: If the derived plugin doesn't override this method.
         """
         raise NotImplementedError
+
+    # Core plugin singer message methods:
+
+    @classmethod
+    def write_message(cls, message: SingerMessageType) -> str | bytes:
+        """Return the supported Python versions.
+
+        Returns:
+            A list of supported Python versions.
+        """
+        return cls.singer_writer.write_message(message)
 
     # Core plugin config:
 
