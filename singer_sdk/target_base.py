@@ -12,7 +12,6 @@ import typing as t
 import click
 from joblib import Parallel, delayed, parallel_config
 
-from singer_sdk._singerlib.encoding import SimpleSingerReader as SingerReader
 from singer_sdk._singerlib.encoding import SingerMessageType
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
@@ -42,7 +41,7 @@ if t.TYPE_CHECKING:
 _MAX_PARALLELISM = 8
 
 
-class Target(PluginBase, SingerReader, metaclass=abc.ABCMeta):
+class Target(PluginBase, metaclass=abc.ABCMeta):
     """Abstract base class for targets.
 
     The `Target` class manages config information and is responsible for processing the
