@@ -7,9 +7,10 @@ import typing as t
 
 import click
 
+from singer_sdk._singerlib.encoding import SimpleSingerReader as SingerReader
+from singer_sdk._singerlib.encoding import SimpleSingerWriter as SingerWriter
 from singer_sdk.helpers._classproperty import classproperty
 from singer_sdk.helpers.capabilities import CapabilitiesEnum, PluginCapabilities
-from singer_sdk.io_base import SingerReader, SingerWriter
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:

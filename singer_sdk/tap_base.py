@@ -12,6 +12,7 @@ from enum import Enum
 import click
 
 from singer_sdk._singerlib import Catalog, StateMessage
+from singer_sdk._singerlib.encoding import SimpleSingerWriter as SingerWriter
 from singer_sdk.configuration._dict_config import merge_missing_config_jsonschema
 from singer_sdk.exceptions import (
     AbortedSyncFailedException,
@@ -29,7 +30,6 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TapCapabilities,
 )
-from singer_sdk.io_base import SingerWriter
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:

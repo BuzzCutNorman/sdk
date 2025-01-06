@@ -8,7 +8,7 @@ from contextlib import redirect_stdout
 import pytest
 
 from singer_sdk import Stream, Tap
-from singer_sdk.io_base import SingerMessageType
+from singer_sdk._singerlib.encoding import SingerMessageType
 
 
 class Parent(Stream):

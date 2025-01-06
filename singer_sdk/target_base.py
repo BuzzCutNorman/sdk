@@ -12,6 +12,8 @@ import typing as t
 import click
 from joblib import Parallel, delayed, parallel_config
 
+from singer_sdk._singerlib.encoding import SimpleSingerReader as SingerReader
+from singer_sdk._singerlib.encoding import SingerMessageType
 from singer_sdk.exceptions import RecordsWithoutSchemaException
 from singer_sdk.helpers._batch import BaseBatchFileEncoding
 from singer_sdk.helpers._classproperty import classproperty
@@ -28,7 +30,6 @@ from singer_sdk.helpers.capabilities import (
     PluginCapabilities,
     TargetCapabilities,
 )
-from singer_sdk.io_base import SingerMessageType, SingerReader
 from singer_sdk.plugin_base import PluginBase
 
 if t.TYPE_CHECKING:

@@ -13,8 +13,9 @@ from textwrap import dedent
 import pytest
 
 from singer_sdk._singerlib import RecordMessage
+from singer_sdk._singerlib.encoding import SimpleSingerReader as SingerReader
+from singer_sdk._singerlib.encoding import SimpleSingerWriter as SingerWriter
 from singer_sdk._singerlib.exceptions import InvalidInputLine
-from singer_sdk.io_base import SingerReader, SingerWriter
 
 
 class DummyReader(SingerReader):
