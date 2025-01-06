@@ -16,6 +16,7 @@ from types import MappingProxyType
 import click
 
 from singer_sdk import about, metrics
+from singer_sdk._singerlib.encoding import SimpleSingerWriter
 from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import (
     merge_missing_config_jsonschema,
@@ -40,6 +41,10 @@ from singer_sdk.typing import (
 
 if t.TYPE_CHECKING:
     from jsonschema import ValidationError
+
+    from ._singerlib.encoding import (
+        GenericSingerWriter,
+    )
 
 SDK_PACKAGE_NAME = "singer_sdk"
 
@@ -119,6 +124,8 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     config_jsonschema: t.ClassVar[dict] = {}
     # A JSON Schema object defining the config options that this tap will accept.
+
+    singer_writer: GenericSingerWriter = SimpleSingerWriter()
 
     _config: dict
 
