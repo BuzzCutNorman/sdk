@@ -218,6 +218,21 @@ class SimpleSingerReader(GenericSingerReader[str]):
             msg = f"Unable to parse line as JSON: {line}"
             raise InvalidInputLine(msg) from exc
 
+    def _process_schema_message(self, message_dict: dict) -> None:
+        pass
+
+    def _process_record_message(self, message_dict: dict) -> None:
+        pass
+
+    def _process_state_message(self, message_dict: dict) -> None:
+        pass
+
+    def _process_activate_version_message(self, message_dict: dict) -> None:
+        pass
+
+    def _process_batch_message(self, message_dict: dict) -> None:
+        pass
+
 
 class SimpleSingerWriter(GenericSingerWriter[str, Message]):
     """Interface for all plugins writing Singer messages to stdout."""
