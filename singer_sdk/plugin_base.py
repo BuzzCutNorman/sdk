@@ -16,7 +16,7 @@ from types import MappingProxyType
 import click
 
 from singer_sdk import about, metrics
-from singer_sdk._singerlib.encoding import SimpleSingerWriter
+from singer_sdk._singerlib.encoding import SimpleSingerReader, SimpleSingerWriter
 from singer_sdk.cli import plugin_cli
 from singer_sdk.configuration._dict_config import (
     merge_missing_config_jsonschema,
@@ -43,6 +43,7 @@ if t.TYPE_CHECKING:
     from jsonschema import ValidationError
 
     from ._singerlib.encoding import (
+        GenericSingerReader,
         GenericSingerWriter,
         SingerMessageType,
     )
@@ -126,6 +127,7 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
     config_jsonschema: t.ClassVar[dict] = {}
     # A JSON Schema object defining the config options that this tap will accept.
 
+    singer_reader: GenericSingerReader = SimpleSingerReader()
     singer_writer: GenericSingerWriter = SimpleSingerWriter()
 
     _config: dict
@@ -372,6 +374,39 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
         return cls.get_sdk_version()
 
     # Abstract methods:
+
+    # Core plugin singer message methods:
+    @t.final
+    @classmethod
+    def listen(cls, file_input: t.IO[str | bytes] | None = None) -> None:
+        """Read from input until all messages are processed.
+
+        Args:
+            file_input: Readable stream of messages. Defaults to standard in.
+        """
+        cls.singer_reader.listen(file_input)
+
+    @classmethod
+    def _process_lines(cls, file_input: t.IO[str | bytes]) -> t.Counter[str]:
+        """Internal method to process jsonl lines from a Singer tap.
+
+        Args:
+            file_input: Readable stream of messages, each on a separate line.
+
+        Returns:
+            A counter object for the processed lines.
+        """
+        return cls.singer_reader._process_lines(file_input=file_input)  # noqa: SLF001
+
+    @classmethod
+    def _assert_line_requires(cls, line_dict: dict, requires: set[str]) -> None:
+        """Check if dictionary .
+
+        Args:
+            line_dict: TODO
+            requires: TODO
+        """
+        cls.singer_reader._assert_line_requires(line_dict=line_dict, requires=requires)  # noqa: SLF001
 
     @property
     def state(self) -> dict:
