@@ -375,6 +375,15 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
 
     # Abstract methods:
 
+    @property
+    def state(self) -> dict:
+        """Get state.
+
+        Raises:
+            NotImplementedError: If the derived plugin doesn't override this method.
+        """
+        raise NotImplementedError
+
     # Core plugin singer message methods:
     @t.final
     @classmethod
@@ -407,17 +416,6 @@ class PluginBase(metaclass=abc.ABCMeta):  # noqa: PLR0904
             requires: TODO
         """
         cls.singer_reader._assert_line_requires(line_dict=line_dict, requires=requires)  # noqa: SLF001
-
-    @property
-    def state(self) -> dict:
-        """Get state.
-
-        Raises:
-            NotImplementedError: If the derived plugin doesn't override this method.
-        """
-        raise NotImplementedError
-
-    # Core plugin singer message methods:
 
     @classmethod
     def write_message(cls, message: SingerMessageType) -> str | bytes:
